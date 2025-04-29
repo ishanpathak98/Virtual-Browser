@@ -1,34 +1,41 @@
-ARG BASE_IMAGE=m1k1o/neko:base
-FROM $BASE_IMAGE
 
-ARG SRC_URL="https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+ARG BASE_IMAGE=m1k1o/neko:base
+FROM --platform=linux/amd64 $BASE_IMAGE
+
+ARG SRC_URL="https://download-installer.cdn.mozilla.net/pub/firefox/releases/138.0/linux-aarch64/en-GB/firefox-138.0.tar.xz"
 
 # Install Firefox
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
+RUN set -eux
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
         wget \
         openbox \
         xz-utils \
         bzip2 \
         libgtk-3-0 \
-        libdbus-glib-1-2; \
-    \
+        libdbus-glib-1-2
+
+
+    
     # Fetch latest Firefox release (follow redirect)
-    wget --trust-server-names -O /tmp/firefox-setup.tar.bz2 "$SRC_URL"; \
-    mkdir -p /usr/lib/firefox; \
-    tar -xjf /tmp/firefox-setup.tar.bz2 --strip-components=1 -C /usr/lib/firefox; \
-    rm -f /tmp/firefox-setup.tar.bz2; \
-    ln -s /usr/lib/firefox/firefox /usr/bin/firefox; \
-    \
+RUN wget --trust-server-names -O /tmp/firefox-setup.tar.bz2 "$SRC_URL"
+
+RUN ls -l /
+RUN ls -l /tmp
+
+RUN mkdir -p /usr/lib/firefox
+RUN tar -xf /tmp/firefox-setup.tar.bz2 --strip-components=1 -C /usr/lib/firefox
+RUN rm -f /tmp/firefox-setup.tar.bz2
+RUN ln -s /usr/lib/firefox/firefox /usr/bin/firefox
+
     # Create a profile directory
-    mkdir -p /home/neko/.mozilla/firefox/profile.default/extensions; \
-    chown -R neko:neko /home/neko/.mozilla/firefox/profile.default; \
-    \
+RUN mkdir -p /home/neko/.mozilla/firefox/profile.defaults/extensions
+RUN chown -R neko:neko /home/neko/.mozilla/firefox/profile.defaults
+
     # Clean up
-    apt-get --purge autoremove -y xz-utils bzip2; \
-    apt-get clean -y; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+RUN apt-get --purge autoremove -y xz-utils bzip2
+RUN apt-get clean -y
+RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Copy configuration files
 COPY supervisord.conf /etc/neko/supervisord/firefox.conf
