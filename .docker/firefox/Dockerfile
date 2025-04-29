@@ -1,5 +1,5 @@
 
-ARG BASE_IMAGE=m1k1o/neko:base
+ARG BASE_IMAGE=m1k1o/neko:latest
 FROM --platform=linux/amd64 $BASE_IMAGE
 
 ARG SRC_URL="https://download-installer.cdn.mozilla.net/pub/firefox/releases/138.0/linux-aarch64/en-GB/firefox-138.0.tar.xz"
@@ -26,6 +26,7 @@ RUN ls -l /tmp
 RUN mkdir -p /usr/lib/firefox
 RUN tar -xf /tmp/firefox-setup.tar.bz2 --strip-components=1 -C /usr/lib/firefox
 RUN rm -f /tmp/firefox-setup.tar.bz2
+RUN rm -rf /usr/bin/firefox
 RUN ln -s /usr/lib/firefox/firefox /usr/bin/firefox
 
     # Create a profile directory
